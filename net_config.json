@@ -1,0 +1,55 @@
+local word_embedding_dim = 5;
+local char_embedding_dim = 5;
+local embedding_dim = 10;
+local hidden_dim = 10;
+local num_epochs = 200;
+local patience = 5;
+local batch_size = 10;
+local learning_rate = 0.05;
+{
+  "dataset_reader": {
+    "type": "data_reader"},
+  "train_data_path": "data/names/*.txt",
+  "validation_data_path": "data/names/*.txt",
+  "model": {
+    "type": "net",
+        "word_embeddings": {
+            "token_embedders": {
+                "tokens": {
+                    "type": "embedding",
+                    "embedding_dim": word_embedding_dim
+                },
+                "token_characters": {
+                    "type": "character_encoding",
+                    "embedding": {
+                        "embedding_dim": char_embedding_dim,
+                    },
+                    "encoder": {
+                        "type": "lstm",
+                        "input_size": char_embedding_dim,
+                        "hidden_size": char_embedding_dim
+                    }
+                }
+            },
+        },
+        "encoder": {
+            "type": "lstm",
+            "input_size": embedding_dim,
+            "hidden_size": hidden_dim
+        }
+  },
+  "iterator": {
+    "type": "bucket",
+    "sorting_keys": [["tokens", "num_tokens"], ["token_characters", "num_token_characters"]],
+    "batch_size": batch_size
+  },
+  "trainer": {
+    "num_epochs": num_epochs,
+    "patience": patience,
+    "cuda_device": -1,
+    "optimizer": {
+            "type": "sgd",
+            "lr": learning_rate
+        },
+  }
+}
